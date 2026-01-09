@@ -1,4 +1,4 @@
-# server.py - 使用OpenCV生成真实视频缩略图的完整服务器
+# server.py - 尝试使用OpenCV生成缩略图
 from flask import Flask, request, send_file, render_template, redirect, url_for
 import os
 import time
@@ -26,6 +26,20 @@ notifications = deque(maxlen=20)
 # 记录服务器启动时间
 server_start_time = time.time()
 
+# 尝试导入OpenCV
+try:
+    import cv2
+    import numpy as np
+    from PIL import Image, ImageDraw
+
+    CV_AVAILABLE = True
+    print("OpenCV 已成功导入")
+except ImportError as e:
+    CV_AVAILABLE = False
+    print(f" OpenCV 导入失败: {e}")
+    print("   将使用默认缩略图")
+    from PIL import Image, ImageDraw
+
 
 def add_notification(message, level='info'):
     """添加一条通知消息"""
@@ -37,6 +51,38 @@ def add_notification(message, level='info'):
     notifications.append(notification)
     print(f"日志: {message}")
 
+
+
+def generate_default_thumbnail(thumbnail_path, size=(320, 180)):
+    """生成一个默认的缩略图（灰色背景+播放图标）"""
+    try:
+        img = Image.new('RGB', size, color=(230, 230, 230))
+        d = ImageDraw.Draw(img)
+
+        # 绘制播放图标
+        icon_size = min(size) // 4
+        x_center = size[0] // 2
+        y_center = size[1] // 2
+
+        # 三角形播放图标
+        triangle = [
+            (x_center - icon_size // 2, y_center - icon_size // 2),
+            (x_center - icon_size // 2, y_center + icon_size // 2),
+            (x_center + icon_size // 2, y_center)
+        ]
+        d.polygon(triangle, fill=(100, 100, 100))
+
+        # 添加文字
+        text = "视频预览"
+        d.text((x_center, y_center + icon_size), text, fill=(150, 150, 150), anchor="mm")
+
+        # 保存图片
+        img.save(thumbnail_path, 'JPEG', quality=90)
+        print(f"已生成默认缩略图: {thumbnail_path}")
+        return True
+    except Exception as e:
+        print(f"生成默认缩略图失败: {e}")
+        return False
 
 
 # 全局请求处理钩子 - 记录所有连接
@@ -215,7 +261,7 @@ def list_videos():
         if not os.path.exists(thumbnail_path):
             video_path = os.path.join(UPLOAD_FOLDER, f)
             if os.path.exists(video_path):
-                print(f"🔄 为现有视频 {f} 生成缩略图...")
+                print(f"为现有视频 {f} 生成缩略图...")
                 if not generate_video_thumbnail(video_path, thumbnail_path):
                     # 确保至少有一个默认缩略图
                     generate_default_thumbnail(thumbnail_path)
@@ -240,8 +286,88 @@ def list_videos():
     return {'videos': videos_list}
 
 
+# 7. 视频预览图接口
+@app.route('/preview/<filename>')
+def get_preview(filename):
+    """
+    获取视频预览图
+    优先返回真实生成的缩略图，如果不存在则实时生成
+    """
+    # 确保文件名正确
+    thumbnail_filename = filename + '.jpg'
+    thumbnail_path = os.path.join(THUMBNAIL_FOLDER, thumbnail_filename)
 
-# 7. 服务器状态接口
+    # 如果缩略图存在，直接返回
+    if os.path.exists(thumbnail_path):
+        try:
+            return send_file(thumbnail_path, mimetype='image/jpeg')
+        except Exception as e:
+            print(f"发送缩略图失败: {e}")
+
+    # 如果缩略图不存在，尝试从视频生成
+    video_path = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.exists(video_path):
+        print(f" 实时生成缩略图: {filename}")
+        if generate_video_thumbnail(video_path, thumbnail_path):
+            return send_file(thumbnail_path, mimetype='image/jpeg')
+
+    # 如果都失败，返回默认缩略图
+    print(f"  使用默认缩略图: {filename}")
+
+    # 在内存中生成默认缩略图
+    img = Image.new('RGB', (320, 180), color=(230, 230, 230))
+    d = ImageDraw.Draw(img)
+
+    # 绘制播放图标
+    d.polygon([(140, 70), (140, 110), (180, 90)], fill=(100, 100, 100))
+
+    # 保存到内存
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='JPEG', quality=90)
+    img_byte_arr.seek(0)
+
+    return send_file(img_byte_arr, mimetype='image/jpeg')
+
+
+# 8. 生成所有视频的缩略图（手动触发）
+@app.route('/generate_all_thumbnails')
+def generate_all_thumbnails():
+    """
+    为所有现有视频生成缩略图
+    """
+    video_files = [f for f in os.listdir(UPLOAD_FOLDER) if
+                   f.endswith(('.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm'))]
+    success_count = 0
+    fail_count = 0
+
+    for video_file in video_files:
+        thumbnail_filename = video_file + '.jpg'
+        thumbnail_path = os.path.join(THUMBNAIL_FOLDER, thumbnail_filename)
+
+        # 如果缩略图已存在，跳过
+        if os.path.exists(thumbnail_path):
+            continue
+
+        video_path = os.path.join(UPLOAD_FOLDER, video_file)
+        print(f" 为 {video_file} 生成缩略图...")
+
+        if generate_video_thumbnail(video_path, thumbnail_path):
+            success_count += 1
+        else:
+            fail_count += 1
+
+    result_msg = f'已为 {success_count} 个视频生成缩略图，失败 {fail_count} 个'
+    add_notification(result_msg, "info" if fail_count == 0 else "warning")
+
+    return {
+        'success': True,
+        'message': result_msg,
+        'success_count': success_count,
+        'fail_count': fail_count
+    }
+
+
+# 9. 服务器状态接口
 @app.route('/status')
 def server_status():
     """获取服务器状态"""
@@ -264,28 +390,13 @@ def server_status():
 
 
 if __name__ == '__main__':
-    print("=" * 60)
-    print("🚀 视频服务器启动")
-    print("=" * 60)
-    print(f"📁 视频目录: {UPLOAD_FOLDER}")
-    print(f"🖼️  缩略图目录: {THUMBNAIL_FOLDER}")
-    print(f"🌐 访问地址: http://localhost:5000")
-    print("=" * 60)
+    print(" 视频服务器启动")
+
+    print(f"访问地址: http://localhost:5000")
+
 
     if not CV_AVAILABLE:
-        print("⚠️  警告: OpenCV 未安装，将使用默认缩略图")
-        print("💡 安装命令: pip install opencv-python")
 
-    print("\n📋 可用接口:")
-    print("  POST /upload                 - 上传视频")
-    print("  GET  /videos                 - 查看视频列表")
-    print("  GET  /video/<filename>       - 播放视频")
-    print("  GET  /download/<filename>    - 下载视频")
-    print("  GET  /preview/<filename>     - 获取缩略图")
-    print("  GET  /generate_all_thumbnails - 为所有视频生成缩略图")
-    print("  GET  /status                 - 服务器状态")
-    print("  GET  /                       - 监控面板")
-    print("=" * 60)
 
     # 添加初始通知
     add_notification("服务器已启动", "success")
@@ -298,7 +409,7 @@ if __name__ == '__main__':
         # 获取本机IP
         hostname = socket.gethostname()
         local_ip = socket.gethostbyname(hostname)
-        print(f"📡 局域网地址: http://{local_ip}:5000")
+        print(f"局域网地址: http://{local_ip}:5000")
     except:
         pass
 
