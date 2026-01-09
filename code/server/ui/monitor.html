@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>视频服务器监控</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+                .notifications {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .notifications h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .notification {
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            background: #f8f9fa;
+        }
+        .notification-info {
+            border-left-color: #17a2b8;
+        }
+        .notification-success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .notification-warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        .notification-error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .notification-time {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .notification-message {
+            color: #333;
+            font-weight: 500;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .stat-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+        .connections {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .connections h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            color: #555;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        tr:hover {
+            background: #f8f9ff;
+        }
+        .ip-address {
+            font-family: monospace;
+            background: #eef2ff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .endpoint {
+            color: #667eea;
+            font-weight: 500;
+        }
+        .time {
+            color: #666;
+            font-size: 14px;
+        }
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .method.get { background: #d4edda; color: #155724; }
+        .method.post { background: #d1ecf1; color: #0c5460; }
+        .method.other { background: #f8d7da; color: #721c24; }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-style: italic;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-refresh {
+            background: #38a169;
+        }
+        .btn-refresh:hover {
+            background: #2f855a;
+        }
+        .btn-clear {
+            background: #e53e3e;
+        }
+        .btn-clear:hover {
+            background: #c53030;
+        }
+        .server-status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #38a169;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="notifications">
+
+<h2>📢 最新通知</h2>
+            {% if notifications %}
+
+<div class="notification-list">
+                {% for notice in notifications %}
+
+<div class="notification notification-{{ notice.level }}">
+
+<div class="notification-time">{{ notice.time }}</div>
+
+<div class="notification-message">{{ notice.message }}</div>
+
+</div>
+                {% endfor %}
+
+</div>
+            {% else %}
+
+<div class="empty-message">
+
+<p>暂无通知</p>
+
+</div>
+            {% endif %}
+
+</div>
+    <div class="container">
+        <div class="header">
+            <h1><span class="server-status"></span>视频服务器监控面板</h1>
+            <p>实时监控服务器连接状态和访问记录</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>活跃连接</h3>
+                <div class="value">{{ connections|length }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>视频文件数</h3>
+                <div class="value">{{ video_count }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>服务器运行</h3>
+                <div class="value">{{ uptime }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>最后更新</h3>
+                <div class="value" id="lastUpdate">{{ update_time }}</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <a href="/monitor" class="btn btn-refresh">刷新页面</a>
+            <a href="/monitor?clear=1" class="btn btn-clear">清空记录</a>
+            <a href="/videos" class="btn">查看视频列表</a>
+            <a href="/" class="btn">返回首页</a>
+        </div>
+
+        <div class="connections">
+            <h2>最近连接记录 (最新{{ connections|length }}条)</h2>
+
+            {% if connections %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>时间</th>
+                        <th>IP地址</th>
+                        <th>请求方法</th>
+                        <th>访问路径</th>
+                        <th>状态码</th>
+                        <th>用户代理</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for conn in connections %}
+                    <tr>
+                        <td class="time">{{ conn.time }}</td>
+                        <td><span class="ip-address">{{ conn.ip }}</span></td>
+                        <td>
+                            <span class="method {{ conn.method|lower }}">{{ conn.method }}</span>
+                        </td>
+                        <td class="endpoint">{{ conn.endpoint }}</td>
+                        <td>
+                            <span class="status {% if conn.status|int < 400 %}success{% else %}error{% endif %}">
+                                {{ conn.status }}
+                            </span>
+                        </td>
+                        <td>{{ conn.user_agent[:50] }}{% if conn.user_agent|length > 50 %}...{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-message">
+                <p>暂无连接记录</p>
+                <p>等待客户端连接...</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // 自动刷新页面（每30秒）
+        setTimeout(function() {
+            window.location.reload();
+        }, 30000);
+
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent =
+                now.toLocaleTimeString();
+        }
+
+        // 每秒更新一次时间
+        setInterval(updateTime, 1000);
+        updateTime(); // 初始化时间
+    </script>
+</body>
+</html>

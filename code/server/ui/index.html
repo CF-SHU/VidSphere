@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>视频服务器</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .link-box {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .link-box a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link-box a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 视频服务器</h1>
+        <p>欢迎使用视频上传和播放服务器</p>
+
+        <div class="link-box">
+            📊 <a href="/monitor">连接监控面板</a> - 查看谁在连接服务器
+        </div>
+
+        <div class="link-box">
+            📹 <a href="/videos">查看视频列表</a> - 查看所有上传的视频
+        </div>
+
+        <div class="link-box">
+            ⬆️ <a href="#" onclick="alert('请使用POST请求到 /upload 接口上传视频')">上传视频</a> - 使用POST方法上传视频文件
+        </div>
+
+        <div class="link-box">
+            📝 <strong>接口说明：</strong>
+            <ul>
+                <li>POST /upload - 上传视频文件</li>
+                <li>GET /videos - 获取视频列表</li>
+                <li>GET /video/文件名 - 播放视频</li>
+                <li>GET /download/文件名 - 下载视频</li>
+                <li>GET /monitor - 连接监控面板</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
