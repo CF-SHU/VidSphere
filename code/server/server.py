@@ -1,4 +1,4 @@
-# server.py - 尝试使用OpenCV生成缩略图
+# server.py - 3.0版本使用OpenCV生成真实视频缩略图的完整服务器
 from flask import Flask, request, send_file, render_template, redirect, url_for
 import os
 import time
@@ -33,10 +33,10 @@ try:
     from PIL import Image, ImageDraw
 
     CV_AVAILABLE = True
-    print("OpenCV 已成功导入")
+    print(" OpenCV 已成功导入")
 except ImportError as e:
     CV_AVAILABLE = False
-    print(f" OpenCV 导入失败: {e}")
+    print(f"  OpenCV 导入失败: {e}")
     print("   将使用默认缩略图")
     from PIL import Image, ImageDraw
 
@@ -51,6 +51,61 @@ def add_notification(message, level='info'):
     notifications.append(notification)
     print(f"日志: {message}")
 
+
+def generate_video_thumbnail(video_path, thumbnail_path, thumbnail_size=(320, 180)):
+    """使用OpenCV生成视频缩略图"""
+    if not CV_AVAILABLE:
+        print("OpenCV不可用，使用默认缩略图")
+        return generate_default_thumbnail(thumbnail_path, thumbnail_size)
+
+    try:
+        # 打开视频文件
+        cap = cv2.VideoCapture(video_path)
+
+        if not cap.isOpened():
+            print(f"无法打开视频文件: {video_path}")
+            cap.release()
+            return generate_default_thumbnail(thumbnail_path, thumbnail_size)
+
+        # 获取视频总帧数和FPS
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+
+        if total_frames == 0:
+            print(f"视频文件无效或为空: {video_path}")
+            cap.release()
+            return generate_default_thumbnail(thumbnail_path, thumbnail_size)
+
+        # 计算要截取的帧（视频的前5%处，避免黑屏）
+        target_frame = int(total_frames * 0.05)
+        if target_frame < 1:
+            target_frame = 1
+
+        # 跳转到目标帧
+        cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
+
+        # 读取帧
+        success, frame = cap.read()
+        cap.release()
+
+        if not success:
+            print(f"无法读取视频帧: {video_path}")
+            return generate_default_thumbnail(thumbnail_path, thumbnail_size)
+
+        # 转换颜色空间 BGR -> RGB
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # 调整大小
+        frame_resized = cv2.resize(frame_rgb, thumbnail_size, interpolation=cv2.INTER_AREA)
+
+        # 保存为JPEG
+        cv2.imwrite(thumbnail_path, frame_resized)
+        print(f"缩略图生成成功: {thumbnail_path} ({thumbnail_size[0]}x{thumbnail_size[1]})")
+        return True
+
+    except Exception as e:
+        print(f"OpenCV生成缩略图失败: {e}")
+        return generate_default_thumbnail(thumbnail_path, thumbnail_size)
 
 
 def generate_default_thumbnail(thumbnail_path, size=(320, 180)):
@@ -78,7 +133,7 @@ def generate_default_thumbnail(thumbnail_path, size=(320, 180)):
 
         # 保存图片
         img.save(thumbnail_path, 'JPEG', quality=90)
-        print(f"已生成默认缩略图: {thumbnail_path}")
+        print(f" 已生成默认缩略图: {thumbnail_path}")
         return True
     except Exception as e:
         print(f"生成默认缩略图失败: {e}")
@@ -190,7 +245,7 @@ def upload_video():
         thumbnail_filename = new_filename + '.jpg'
         thumbnail_path = os.path.join(THUMBNAIL_FOLDER, thumbnail_filename)
 
-        print(f"📹 正在为 {new_filename} 生成缩略图...")
+        print(f" 正在为 {new_filename} 生成缩略图...")
         if generate_video_thumbnail(filepath, thumbnail_path):
             add_notification(f"已生成缩略图: {thumbnail_filename}", "info")
         else:
@@ -261,7 +316,7 @@ def list_videos():
         if not os.path.exists(thumbnail_path):
             video_path = os.path.join(UPLOAD_FOLDER, f)
             if os.path.exists(video_path):
-                print(f"为现有视频 {f} 生成缩略图...")
+                print(f" 为现有视频 {f} 生成缩略图...")
                 if not generate_video_thumbnail(video_path, thumbnail_path):
                     # 确保至少有一个默认缩略图
                     generate_default_thumbnail(thumbnail_path)
@@ -307,7 +362,7 @@ def get_preview(filename):
     # 如果缩略图不存在，尝试从视频生成
     video_path = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.exists(video_path):
-        print(f" 实时生成缩略图: {filename}")
+        print(f"⚡ 实时生成缩略图: {filename}")
         if generate_video_thumbnail(video_path, thumbnail_path):
             return send_file(thumbnail_path, mimetype='image/jpeg')
 
@@ -391,11 +446,10 @@ def server_status():
 
 if __name__ == '__main__':
     print(" 视频服务器启动")
-
-    print(f"访问地址: http://localhost:5000")
-
+    print(f" 访问地址: http://localhost:5000")
 
     if not CV_AVAILABLE:
+        print(" 警告: OpenCV 未安装，将使用默认缩略图")
 
 
     # 添加初始通知
@@ -409,7 +463,7 @@ if __name__ == '__main__':
         # 获取本机IP
         hostname = socket.gethostname()
         local_ip = socket.gethostbyname(hostname)
-        print(f"局域网地址: http://{local_ip}:5000")
+        print(f" 局域网地址: http://{local_ip}:5000")
     except:
         pass
 
