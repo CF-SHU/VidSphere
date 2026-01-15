@@ -163,7 +163,6 @@ private:
     void clearVideoList();//清空视频列表
     void downloadVideo(const QString &downloadUrl, const QString &filename);//下载视频
     void emitDownloadRequested();//发出下载请求信号
-    void updateProgressOnly(qint64 position);
 
     Ui::PlayVideoUI *ui;
     QNetworkAccessManager *networkManager;

@@ -1,9 +1,9 @@
-/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/VidSphere.dir
-/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/edit_cache.dir
-/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/rebuild_cache.dir
-/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/list_install_components.dir
-/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/install.dir
-/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/install/local.dir
-/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/install/strip.dir
-/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/VidSphere_autogen_timestamp_deps.dir
-/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/VidSphere_autogen.dir
+/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/VidSphere.dir
+/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/edit_cache.dir
+/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/rebuild_cache.dir
+/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/list_install_components.dir
+/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/install.dir
+/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/install/local.dir
+/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/install/strip.dir
+/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/VidSphere_autogen_timestamp_deps.dir
+/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/CMakeFiles/VidSphere_autogen.dir

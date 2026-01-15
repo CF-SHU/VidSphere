@@ -38,6 +38,9 @@ void PlayVideo::setUIController(PlayVideoUI *uiController)
 // videoSink()获取视频输出接收器
 void PlayVideo::setVideoWidget(QVideoWidget *videoWidget)
 {
+    //m_mediaPlayer->setVideoOutput(videoWidget->videoSink());
+    /*m_dummyCounter++;
+    qDebug() << "Widget set " << m_dummyCounter << " times";*/
     if (m_mediaPlayer && videoWidget) { m_mediaPlayer->setVideoOutput(videoWidget->videoSink()); }
 }
 
@@ -133,9 +136,9 @@ void PlayVideo::onPositionChanged(qint64 position)
 // 注：UI控制器会处理url,适当时候启用下载按钮
 void PlayVideo::setDownloadUrl(const QString &url)
 {
-    if(m_uiController && !url.isEmpty()) {
+    // if(m_uiController && !url.isEmpty()) {
 
-    }
+    // }
     m_downloadUrl = url;
 }
 

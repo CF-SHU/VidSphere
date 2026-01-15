@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-ef43e2a6e77401c7e49d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "VidSphere",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "VidSphere::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-VidSphere-Debug-b11da33bf334d7ed3ca4.json",
+					"name" : "VidSphere",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "VidSphere_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-VidSphere_autogen-Debug-94ab1c9126147b2aa50c.json",
+					"name" : "VidSphere_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "VidSphere_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-VidSphere_autogen_timestamp_deps-Debug-c7debc2e9eef9c5af062.json",
+					"name" : "VidSphere_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/root/\u5927\u578b\u8f6f\u4ef6\u5f00\u53d1/shixun/VidSphere/build/C_C_2026_01_16-Debug",
+		"source" : "/root/\u5927\u578b\u8f6f\u4ef6\u5f00\u53d1/shixun/VidSphere"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

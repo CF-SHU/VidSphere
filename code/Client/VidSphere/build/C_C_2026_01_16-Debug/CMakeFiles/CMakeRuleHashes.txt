@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+4d5b21f39726704f9fb78f839a1a6c58 CMakeFiles/VidSphere_autogen
+05390badeb4da56e61f220ef2dece189 VidSphere_autogen/timestamp

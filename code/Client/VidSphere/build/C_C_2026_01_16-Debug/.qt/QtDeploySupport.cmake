@@ -27,14 +27,14 @@ if(QT_DEPLOY_PREFIX STREQUAL "")
     set(QT_DEPLOY_PREFIX .)
 endif()
 if(NOT QT_DEPLOY_IGNORED_LIB_DIRS)
-    set(QT_DEPLOY_IGNORED_LIB_DIRS "/usr/lib/gcc/x86_64-pc-linux-gnu/15.1.1;/usr/lib;/lib")
+    set(QT_DEPLOY_IGNORED_LIB_DIRS "/usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1;/usr/lib;/lib")
 endif()
 
 # These are internal implementation details. They may be removed at any time.
 set(__QT_DEPLOY_SYSTEM_NAME "Linux")
 set(__QT_DEPLOY_IS_SHARED_LIBS_BUILD "ON")
 set(__QT_DEPLOY_TOOL "GRD")
-set(__QT_DEPLOY_IMPL_DIR "/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/.qt")
+set(__QT_DEPLOY_IMPL_DIR "/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/.qt")
 set(__QT_DEPLOY_VERBOSE "")
 set(__QT_CMAKE_EXPORT_NAMESPACE "Qt6")
 set(__QT_DEPLOY_GENERATOR_IS_MULTI_CONFIG "0")
@@ -42,13 +42,13 @@ set(__QT_DEPLOY_ACTIVE_CONFIG "Debug")
 set(__QT_NO_CREATE_VERSIONLESS_FUNCTIONS "")
 set(__QT_DEFAULT_MAJOR_VERSION "6")
 set(__QT_DEPLOY_QT_ADDITIONAL_PACKAGES_PREFIX_PATH "")
-set(__QT_DEPLOY_QT_INSTALL_PREFIX "/opt/Qt/6.9.1/gcc_64")
+set(__QT_DEPLOY_QT_INSTALL_PREFIX "/run/media/root/root/opt/Qt/6.9.1/gcc_64")
 set(__QT_DEPLOY_QT_INSTALL_BINS "bin")
 set(__QT_DEPLOY_QT_INSTALL_DATA ".")
 set(__QT_DEPLOY_QT_INSTALL_LIBEXECS "libexec")
 set(__QT_DEPLOY_QT_INSTALL_PLUGINS "plugins")
 set(__QT_DEPLOY_QT_INSTALL_TRANSLATIONS "translations")
-set(__QT_DEPLOY_TARGET_QT_PATHS_PATH "/opt/Qt/6.9.1/gcc_64/bin/qtpaths6")
+set(__QT_DEPLOY_TARGET_QT_PATHS_PATH "/run/media/root/root/opt/Qt/6.9.1/gcc_64/bin/qtpaths6")
 set(__QT_DEPLOY_PLUGINS "")
 set(__QT_DEPLOY_MUST_ADJUST_PLUGINS_RPATH "")
 set(__QT_DEPLOY_USE_PATCHELF "")
@@ -58,8 +58,8 @@ set(__QT_DEPLOY_QT_DEBUG_POSTFIX "")
 
 # Define the CMake commands to be made available during deployment.
 set(__qt_deploy_support_files
-    "/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/.qt/QtDeployTargets.cmake"
-    "/opt/Qt/6.9.1/gcc_64/lib/cmake/Qt6Core/Qt6CoreDeploySupport.cmake"
+    "/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/.qt/QtDeployTargets.cmake"
+    "/run/media/root/root/opt/Qt/6.9.1/gcc_64/lib/cmake/Qt6Core/Qt6CoreDeploySupport.cmake"
 )
 foreach(__qt_deploy_support_file IN LISTS __qt_deploy_support_files)
     include("${__qt_deploy_support_file}")

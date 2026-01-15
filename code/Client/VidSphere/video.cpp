@@ -67,6 +67,13 @@ Video::Video(const QString &title,
 // 设置视频标题，更新标题标签显示
 void Video::setTitle(const QString &title)
 {
+    // m_title = title;
+    // if (m_titleLabel) {
+    //     m_titleLabel->setText(title);
+    // } else {
+    //     // 万一m_titleLabel还没创建
+    //     m_titleLabel = new QLabel(title, this);
+    // }
     m_title = title;
     m_titleLabel->setText(title);
 }
@@ -114,7 +121,7 @@ void Video::setDownloadUrl(const QString &downloadUrl)
     m_downloadUrl = downloadUrl;
 }
 
-// 处理绘制事件————————？？
+// 处理绘制事件
 void Video::paintEvent(QPaintEvent *event)
 {
     QStyleOption opt;
@@ -123,3 +130,18 @@ void Video::paintEvent(QPaintEvent *event)
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);//绘制基本控件样式
     QWidget::paintEvent(event);
 }
+
+// QString Video::getTitle() const
+// {
+//     return m_title;
+// }
+
+// // 获取作者
+// QString Video::getAuthor() const
+// {
+//     // 去掉"UP主: "前缀
+//     if (m_author.startsWith("UP主: ")) {
+//         return m_author.mid(6);  // 从第6个字符开始
+//     }
+//     return m_author;
+// }

@@ -92,11 +92,6 @@ PlayVideoUI::PlayVideoUI(QWidget *parent)
     // 连接进度滑块信号
     connect(progressSlider, &QSlider::sliderPressed, this, [this]() {
         isSliderBeingDragged = true; // 开始拖动
-        if (playVideoController) {
-            qint64 duration = playVideoController->getDuration();
-            qint64 newPosition = (progressSlider->value() * duration) / 100;
-            playVideoController->setPosition(newPosition);
-        }
     });
     connect(progressSlider, &QSlider::sliderMoved, this, [this]() {
         // 当拖动滑块时更新当前时间标签
@@ -107,11 +102,25 @@ PlayVideoUI::PlayVideoUI(QWidget *parent)
         }
     });
     connect(progressSlider, &QSlider::sliderReleased, this, [this]() {
-        isSliderBeingDragged = false; // 结束拖动
         if (playVideoController) {
             qint64 duration = playVideoController->getDuration();
-            qint64 newPosition = (progressSlider->value() * duration) / 100;
-            playVideoController->setPosition(newPosition);
+            if (duration > 0) {
+                qint64 newPosition = (progressSlider->value() * duration) / 100;
+                playVideoController->setPosition(newPosition);
+            }
+        }
+        isSliderBeingDragged = false; // 结束拖动
+    });
+    
+    // 连接单击进度条的信号
+    connect(progressSlider, &QSlider::valueChanged, this, [this](int value) {
+        // 只在不是用户拖动时响应，防止重复设置
+        if (!isSliderBeingDragged && playVideoController) {
+            qint64 duration = playVideoController->getDuration();
+            if (duration > 0) {
+                qint64 newPosition = (value * duration) / 100;
+                playVideoController->setPosition(newPosition);
+            }
         }
     });
     
@@ -690,23 +699,23 @@ QString PlayVideoUI::formatTime(qint64 timeInMs)
 //         playVideoController->setPosition(newPosition);
 //     }
 // }
-/*
+
 // 更新进度显示
 void PlayVideoUI::updateProgress(qint64 position, qint64 duration)
 {
     if (duration > 0) {
         int progress = static_cast<int>((position * 100) / duration);
-        
+
         // 只有在进度条没有被用户拖动时才更新进度条位置
         if (!isSliderBeingDragged) {
             progressSlider->blockSignals(true); // 阻止信号循环
             progressSlider->setValue(progress);
             progressSlider->blockSignals(false);
         }
-        
+
         currentTimeLabel->setText(formatTime(position));
         totalTimeLabel->setText(formatTime(duration));
-        
+
         // 已删除的组件更新
         // if (playerStatusLabel) {
         //     playerStatusLabel->setText(formatTime(position) + " / " + formatTime(duration));
@@ -715,63 +724,48 @@ void PlayVideoUI::updateProgress(qint64 position, qint64 duration)
         //     playerProgressBar->setValue(progress);
         // }
     }
-}*/
-/*
-QString Video::getTitle() const
-{
-    return m_title;
 }
-
-// 获取作者
-QString Video::getAuthor() const
-{
-    // 去掉"UP主: "前缀
-    if (m_author.startsWith("UP主: ")) {
-        return m_author.mid(6);  // 从第6个字符开始
-    }
-    return m_author;
-}*/
 
 //更新进度显示
-void PlayVideoUI::updateProgress(qint64 position, qint64 duration)
-{
-    // 确保在主线程中更新UI
-    if (!this) return;
+// void PlayVideoUI::updateProgress(qint64 position, qint64 duration)
+// {
+//     // 确保在主线程中更新UI
+//     if (!this) return;
 
-    // 更新总时长标签（只在首次或时长变化时更新）
-    static qint64 lastDuration = 0;
-    if (duration != lastDuration && duration > 0) {
-        totalTimeLabel->setText(formatTime(duration));
-        lastDuration = duration;
+//     // 更新总时长标签（只在首次或时长变化时更新）
+//     static qint64 lastDuration = 0;
+//     if (duration != lastDuration && duration > 0) {
+//         totalTimeLabel->setText(formatTime(duration));
+//         lastDuration = duration;
 
-        // 启用进度滑块
-        if (!progressSlider->isEnabled()) { progressSlider->setEnabled(true); }
-    }
+//         // 启用进度滑块
+//         if (!progressSlider->isEnabled()) { progressSlider->setEnabled(true); }
+//     }
 
-    // 更新当前位置标签
-    currentTimeLabel->setText(formatTime(position));
+//     // 更新当前位置标签
+//     currentTimeLabel->setText(formatTime(position));
 
-    // 计算并更新进度滑块
-    if (duration > 0) {
-        int progress = static_cast<int>((position * 100) / duration);
+//     // 计算并更新进度滑块
+//     if (duration > 0) {
+//         int progress = static_cast<int>((position * 100) / duration);
 
-        // 防止滑块在用户拖动时自动跳回
-        if (!progressSlider->isSliderDown()) {
-            progressSlider->blockSignals(true); // 阻止信号循环
-            progressSlider->setValue(progress);
-            progressSlider->blockSignals(false);
-        }
-    } else {
-        // 如果总时长为0，重置进度
-        progressSlider->setValue(0);
-    }
-}
+//         // 防止滑块在用户拖动时自动跳回
+//         if (!progressSlider->isSliderDown()) {
+//             progressSlider->blockSignals(true); // 阻止信号循环
+//             progressSlider->setValue(progress);
+//             progressSlider->blockSignals(false);
+//         }
+//     } else {
+//         // 如果总时长为0，重置进度
+//         progressSlider->setValue(0);
+//     }
+// }
 
-// 实现
-void PlayVideoUI::updateProgressOnly(qint64 position)
-{
-    if (playVideoController) {
-        qint64 duration = playVideoController->getDuration();
-        updateProgress(position, duration);
-    }
-}
+// // 实现
+// void PlayVideoUI::updateProgressOnly(qint64 position)
+// {
+//     if (playVideoController) {
+//         qint64 duration = playVideoController->getDuration();
+//         updateProgress(position, duration);
+//     }
+// }

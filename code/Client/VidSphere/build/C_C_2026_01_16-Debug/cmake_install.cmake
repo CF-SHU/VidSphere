@@ -1,8 +1,8 @@
-# Install script for directory: /root/新建文件夹/新建文件夹 (6)/VidSphere
+# Install script for directory: /root/大型软件开发/shixun/VidSphere
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/tmp")
+  set(CMAKE_INSTALL_PREFIX "/usr/local")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -49,12 +49,12 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/VidSphere"
          RPATH "\$ORIGIN:\$ORIGIN/../lib")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/VidSphere")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/VidSphere")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/VidSphere" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/VidSphere")
     file(RPATH_CHANGE
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/VidSphere"
-         OLD_RPATH "/opt/Qt/6.9.1/gcc_64/lib:"
+         OLD_RPATH "/run/media/root/root/opt/Qt/6.9.1/gcc_64/lib:"
          NEW_RPATH "\$ORIGIN:\$ORIGIN/../lib")
     if(CMAKE_INSTALL_DO_STRIP)
       execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/VidSphere")
@@ -65,7 +65,7 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/install_local_manifest.txt"
+  file(WRITE "/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
 if(CMAKE_INSTALL_COMPONENT)
@@ -81,6 +81,6 @@ else()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/root/新建文件夹/新建文件夹 (6)/VidSphere/build/C_C_2026_01_16-Debug/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "/root/大型软件开发/shixun/VidSphere/build/C_C_2026_01_16-Debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
