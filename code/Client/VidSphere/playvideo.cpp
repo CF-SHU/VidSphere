@@ -133,6 +133,9 @@ void PlayVideo::onPositionChanged(qint64 position)
 // 注：UI控制器会处理url,适当时候启用下载按钮
 void PlayVideo::setDownloadUrl(const QString &url)
 {
+    if(m_uiController && !url.isEmpty()) {
+
+    }
     m_downloadUrl = url;
 }
 
@@ -140,4 +143,37 @@ void PlayVideo::setDownloadUrl(const QString &url)
 QString PlayVideo::getDownloadUrl() const
 {
     return m_downloadUrl;
+}
+
+qint64 PlayVideo::getDuration() const
+{
+    if (m_mediaPlayer) {
+        return m_mediaPlayer->duration();
+    }
+    return 0;
+}
+
+qint64 PlayVideo::getPosition() const
+{
+    if (m_mediaPlayer) {
+        return m_mediaPlayer->position();
+    }
+    return 0;
+}
+
+void PlayVideo::setPosition(qint64 position)
+{
+    if (m_mediaPlayer) {
+        m_mediaPlayer->setPosition(position);
+    }
+}
+
+// 连接进度信号到UI
+void PlayVideo::connectProgressSignal()
+{
+    if (m_uiController) {
+        connect(this, &PlayVideo::progressChanged, m_uiController, [this](int progress) {
+            m_uiController->updateProgress(this->getPosition(), this->getDuration());
+        });
+    }
 }

@@ -34,6 +34,12 @@ public:
     QString getDownloadUrl() const;
 
     bool isPlaying() const;
+    qint64 getDuration() const;
+    qint64 getPosition() const;
+    void setPosition(qint64 position);
+
+    // 连接进度信号到UI
+    void connectProgressSignal();
 
 signals:
     void statusChanged(const QString &message);

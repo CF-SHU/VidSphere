@@ -82,6 +82,45 @@ PlayVideoUI::PlayVideoUI(QWidget *parent)
     
     // 连接刷新按钮
     connect(ui->refreshButton, &QPushButton::clicked, this, &PlayVideoUI::onRefreshButtonClicked);
+
+    // 初始化进度滑块组件
+    progressSlider = ui->progressSlider;
+    currentTimeLabel = ui->currentTimeLabel;
+    totalTimeLabel = ui->totalTimeLabel;
+    isSliderBeingDragged = false; // 初始化为false
+
+    // 连接进度滑块信号
+    connect(progressSlider, &QSlider::sliderPressed, this, [this]() {
+        isSliderBeingDragged = true; // 开始拖动
+        if (playVideoController) {
+            qint64 duration = playVideoController->getDuration();
+            qint64 newPosition = (progressSlider->value() * duration) / 100;
+            playVideoController->setPosition(newPosition);
+        }
+    });
+    connect(progressSlider, &QSlider::sliderMoved, this, [this]() {
+        // 当拖动滑块时更新当前时间标签
+        if (playVideoController) {
+            qint64 duration = playVideoController->getDuration();
+            qint64 newPosition = (progressSlider->value() * duration) / 100;
+            currentTimeLabel->setText(formatTime(newPosition));
+        }
+    });
+    connect(progressSlider, &QSlider::sliderReleased, this, [this]() {
+        isSliderBeingDragged = false; // 结束拖动
+        if (playVideoController) {
+            qint64 duration = playVideoController->getDuration();
+            qint64 newPosition = (progressSlider->value() * duration) / 100;
+            playVideoController->setPosition(newPosition);
+        }
+    });
+    
+    // 已删除的组件初始化
+    // playerStatusLabel = ui->playerStatusLabel;
+    // playerProgressBar = ui->playerProgressBar;
+
+    // 连接播放器进度信号
+    playVideoController->connectProgressSignal();
 }
 
 PlayVideoUI::~PlayVideoUI()
@@ -448,12 +487,11 @@ void PlayVideoUI::emitDownloadRequested()
     // 获取当前播放视频的下载URL
     QString downloadUrl = playVideoController->getDownloadUrl();
     if (!downloadUrl.isEmpty()) {
-        // 获取视频名称（从状态标签获取）
-        QString statusText = ui->playerStatusLabel->text();
-        QString videoName = statusText.startsWith("已选择: ") ? statusText.mid(4) : "unknown";
-
-        // 弹出保存文件对话框
+        // 从下载URL中提取视频名称
         QString fileName = QFileInfo(downloadUrl).fileName();
+        QString videoName = QFileInfo(fileName).completeBaseName(); // 去掉扩展名
+        
+        // 弹出保存文件对话框
         QString savePath = QFileDialog::getSaveFileName(this,
                                                         "保存视频文件",
                                                         QDir::homePath() + "/" + fileName,
@@ -506,7 +544,7 @@ void PlayVideoUI::onVideoSelected(int index)
     ui->stopButton->setEnabled(true);
 
     // 更新状态
-    ui->playerStatusLabel->setText("已选择: " + videoList[index].first);
+    // ui->playerStatusLabel->setText("已选择: " + videoList[index].first);  // 已删除的组件
 
     // 显示视频播放界面
     showVideoPlayer();
@@ -564,6 +602,11 @@ void PlayVideoUI::onVideoListReceived(QNetworkReply *reply)
             QString downloadUrl = videoObj["download_url"].toString(); // 获取下载链接
             QString author = videoObj["author"].toString();            // 假设服务器返回作者信息
             QString thumbnail = videoObj["thumbnail"].toString();      // 假设服务器返回缩略图URL
+            
+            // 如果缩略图URL是相对路径，构建完整URL
+            if (!thumbnail.isEmpty() && thumbnail.startsWith("/")) {
+                thumbnail = serverAddress + thumbnail;
+            }
 
             if (!name.isEmpty() && !url.isEmpty()) {
                 // 添加到视频列表
@@ -627,4 +670,108 @@ void PlayVideoUI::onRefreshButtonClicked()
 
     // 重新获取视频列表
     loadVideoList();
+}
+
+// 格式化时间为 mm:ss 格式
+QString PlayVideoUI::formatTime(qint64 timeInMs)
+{
+    int totalSeconds = static_cast<int>(timeInMs / 1000);
+    int minutes = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
+    return QString("%1:%2").arg(minutes, 2, 10, QChar('0')).arg(seconds, 2, 10, QChar('0'));
+}
+
+// 处理进度滑块值改变事件
+// void PlayVideoUI::onProgressSliderChanged()
+// {
+//     if (playVideoController) {
+//         qint64 duration = playVideoController->getDuration();
+//         qint64 newPosition = (progressSlider->value() * duration) / 100;
+//         playVideoController->setPosition(newPosition);
+//     }
+// }
+/*
+// 更新进度显示
+void PlayVideoUI::updateProgress(qint64 position, qint64 duration)
+{
+    if (duration > 0) {
+        int progress = static_cast<int>((position * 100) / duration);
+        
+        // 只有在进度条没有被用户拖动时才更新进度条位置
+        if (!isSliderBeingDragged) {
+            progressSlider->blockSignals(true); // 阻止信号循环
+            progressSlider->setValue(progress);
+            progressSlider->blockSignals(false);
+        }
+        
+        currentTimeLabel->setText(formatTime(position));
+        totalTimeLabel->setText(formatTime(duration));
+        
+        // 已删除的组件更新
+        // if (playerStatusLabel) {
+        //     playerStatusLabel->setText(formatTime(position) + " / " + formatTime(duration));
+        // }
+        // if (playerProgressBar) {
+        //     playerProgressBar->setValue(progress);
+        // }
+    }
+}*/
+/*
+QString Video::getTitle() const
+{
+    return m_title;
+}
+
+// 获取作者
+QString Video::getAuthor() const
+{
+    // 去掉"UP主: "前缀
+    if (m_author.startsWith("UP主: ")) {
+        return m_author.mid(6);  // 从第6个字符开始
+    }
+    return m_author;
+}*/
+
+//更新进度显示
+void PlayVideoUI::updateProgress(qint64 position, qint64 duration)
+{
+    // 确保在主线程中更新UI
+    if (!this) return;
+
+    // 更新总时长标签（只在首次或时长变化时更新）
+    static qint64 lastDuration = 0;
+    if (duration != lastDuration && duration > 0) {
+        totalTimeLabel->setText(formatTime(duration));
+        lastDuration = duration;
+
+        // 启用进度滑块
+        if (!progressSlider->isEnabled()) { progressSlider->setEnabled(true); }
+    }
+
+    // 更新当前位置标签
+    currentTimeLabel->setText(formatTime(position));
+
+    // 计算并更新进度滑块
+    if (duration > 0) {
+        int progress = static_cast<int>((position * 100) / duration);
+
+        // 防止滑块在用户拖动时自动跳回
+        if (!progressSlider->isSliderDown()) {
+            progressSlider->blockSignals(true); // 阻止信号循环
+            progressSlider->setValue(progress);
+            progressSlider->blockSignals(false);
+        }
+    } else {
+        // 如果总时长为0，重置进度
+        progressSlider->setValue(0);
+    }
+}
+
+// 实现
+void PlayVideoUI::updateProgressOnly(qint64 position)
+{
+    if (playVideoController) {
+        qint64 duration = playVideoController->getDuration();
+        updateProgress(position, duration);
+    }
 }

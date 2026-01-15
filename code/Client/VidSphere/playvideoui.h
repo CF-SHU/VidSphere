@@ -20,6 +20,9 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QMouseEvent>
+#include <QPixmap>
+#include <QPainter>
+#include <QNetworkRequest>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -63,12 +66,44 @@ public:
 
         setCursor(Qt::PointingHandCursor);
 
-        // 如果有缩略图URL，则加载图片，否则显示占位符（默认格式）
+        // 如果有缩略图URL，则加载图片，否则显示占位符
         if (!thumbnail.isEmpty()) {
-            m_thumbnailLabel->setText("视频");
+            m_thumbnailLabel->setText(""); // 先清空文本，等待图片加载
+            loadImage(thumbnail);
         } else {
             m_thumbnailLabel->setText("视频");
         }
+    }
+
+    void loadImage(const QString &imageUrl) {
+        // 创建网络请求获取缩略图
+        QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+        connect(manager, &QNetworkAccessManager::finished, this, [this, manager](QNetworkReply *reply) {
+            if (reply->error() == QNetworkReply::NoError) {
+                QPixmap pixmap;
+                pixmap.loadFromData(reply->readAll());
+                if (!pixmap.isNull()) {
+                    // 缩放图片以适应标签
+                    QPixmap scaledPixmap = pixmap.scaled(
+                        m_thumbnailLabel->size(), 
+                        Qt::KeepAspectRatio, 
+                        Qt::SmoothTransformation
+                    );
+                    m_thumbnailLabel->setPixmap(scaledPixmap);
+                    m_thumbnailLabel->setText(""); // 清除文本
+                } else {
+                    m_thumbnailLabel->setText("视频");
+                }
+            } else {
+                m_thumbnailLabel->setText("视频");
+            }
+            reply->deleteLater();
+            manager->deleteLater();
+        });
+
+        QNetworkRequest request;
+        request.setUrl(QUrl(imageUrl));
+        manager->get(request);
     }
 
 signals:
@@ -96,6 +131,9 @@ public:
     PlayVideoUI(QWidget *parent = nullptr);
     ~PlayVideoUI();
 
+    void updateProgress(qint64 position, qint64 duration);
+    QString formatTime(qint64 timeInMs);
+
 private slots:
     void onConnectClicked();//连接服务器
     void onVideoListReceived(QNetworkReply *reply);//接收视频列表
@@ -116,6 +154,7 @@ private slots:
     void onBrowseButtonClicked();
     void onUploadButtonClicked();
     void onRefreshButtonClicked();
+    // void onProgressSliderChanged();  // 已被lambda函数替代
 
 private:
     void loadVideoList();//加载视频列表
@@ -124,6 +163,7 @@ private:
     void clearVideoList();//清空视频列表
     void downloadVideo(const QString &downloadUrl, const QString &filename);//下载视频
     void emitDownloadRequested();//发出下载请求信号
+    void updateProgressOnly(qint64 position);
 
     Ui::PlayVideoUI *ui;
     QNetworkAccessManager *networkManager;
@@ -133,4 +173,14 @@ private:
     QList<QPair<QString, QString>> videoDetails; //视频详细信息 (标题, 作者)
     QString currentUploadFilePath;               //当前上传的文件路径
     QList<QString> videoDownloadUrls;            //视频下载URL列表
+
+    // 进度条相关组件
+    QSlider *progressSlider;
+    QLabel *currentTimeLabel;
+    QLabel *totalTimeLabel;
+    bool isSliderBeingDragged; // 标记进度条是否正在被拖动
+    
+    // 已删除的组件
+    // QLabel *playerStatusLabel;
+    // QProgressBar *playerProgressBar;
 };
